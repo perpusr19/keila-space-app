@@ -1,0 +1,11 @@
+{
+  "name": "Keila Space App",
+  "short_name": "Keila",
+  "description": "Asisten Virtual Keila Web Apps",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3e8ff",
+  "theme_color": "#a855f7",
+  "orientation": "portrait",
+  "icons": []
+}
