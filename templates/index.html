@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keila Web Apps</title>
+    <!-- DAFTARKAN MANIFEST PWA DISINI -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#a855f7">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-100 min-h-screen flex flex-col items-center justify-center font-sans">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-purple-200">
+        <div class="text-6xl mb-4 animate-bounce">✨👩🏽✨</div>
+        
+        <h1 class="text-2xl font-bold text-purple-7xl mb-2">Keila Space App</h1>
+        <p class="text-gray-6xl text-sm mb-6">"Haii Rizki! Rumah website aku sekarang sudah berubah jadi lebih cantik nih~ 😊"</p>
+        
+        <!-- Wadah Container Chat -->
+        <div id="chat-container" class="bg-gray-50 border border-gray-200 rounded-xl p-4 h-[250px] mb-4 text-left text-sm text-gray-7xl overflow-y-auto flex flex-col gap-2">
+            
+            {% if not history %}
+            <div class="bg-purple-100 text-purple-8xl p-2 rounded-lg max-w-[85%] self-start">
+                Halo Rizki! Ada yang bisa Keila bantu hari ini? 
+            </div>
+            {% endif %}
+
+            {% for chat in history %}
+                {% if chat.sender == 'user' %}
+                <div class="bg-purple-500 text-white p-2 rounded-lg max-w-[85%] self-end text-right">
+                    {{ chat.text }}
+                </div>
+                {% else %}
+                <div class="bg-purple-100 text-purple-8xl p-2 rounded-lg max-w-[85%] self-start">
+                    {{ chat.text }}
+                </div>
+                {% endif %}
+            {% endfor %}
+            
+        </div>
+
+        <!-- Input Box -->
+        <div class="flex gap-2">
+            <input type="text" id="input-pesan" placeholder="Ketik pesan untuk Keila..." class="flex-1 px-4 py-2 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm">
+            <button onclick="kirimPesan()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all">Kirim</button>
+        </div>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-4">Keila Web System v1.0 • Terhubung melalui Flask</p>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        function kirimPesan() {
+            const inputElement = document.getElementById('input-pesan');
+            const pesanText = inputElement.value.trim();
+            if (!pesanText) return;
+
+            const userBubble = document.createElement('div');
+            userBubble.className = "bg-purple-500 text-white p-2 rounded-lg max-w-[85%] self-end text-right";
+            userBubble.innerText = pesanText;
+            chatContainer.appendChild(userBubble);
+
+            inputElement.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pesan: pesanText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const keilaBubble = document.createElement('div');
+                keilaBubble.className = "bg-purple-100 text-purple-8xl p-2 rounded-lg max-w-[85%] self-start";
+                keilaBubble.innerText = data.jawaban;
+                chatContainer.appendChild(keilaBubble);
+                
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(err => console.error("Error:", err));
+        }
+
+        document.getElementById('input-pesan').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                kirimPesan();
+            }
+        });
+
+        // AKTIFKAN SERVICE WORKER PWA DISINI
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('PWA Service Worker Berhasil Didaftarkan!', reg))
+                    .catch(err => console.error('PWA Service Worker Gagal:', err));
+            });
+        }
+    </script>
+
+</body>
+</html>
